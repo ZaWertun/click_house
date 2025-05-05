@@ -6,8 +6,8 @@ require 'pry'
 require_relative '../../click_house'
 
 
-ClickHouse.config.json_serializer = ClickHouse::Serializer::JsonOjSerializer
-ClickHouse.config.json_parser = ClickHouse::Middleware::ParseJsonOj
+ClickHouse.config.json_serializer = ClickHouse::Serializer::JsonSerializer
+ClickHouse.config.json_parser = ClickHouse::Middleware::ParseJson
 ClickHouse.connection.drop_table('benchmark', if_exists: true)
 ClickHouse.connection.execute <<~SQL
 CREATE TABLE benchmark(

@@ -56,11 +56,7 @@ module ClickHouse
         conn.ssl.verify = config.ssl_verify
 
         if config.auth?
-          if faraday_v1?
-            conn.request :basic_auth, config.username, config.password
-          else
-            conn.request :authorization, :basic, config.username, config.password
-          end
+          conn.request :authorization, :basic, config.username, config.password
         end
 
         conn.response Middleware::RaiseError
@@ -76,11 +72,6 @@ module ClickHouse
     def compose(path, query = {})
       # without <query.compact> "DB::Exception: Empty query" error will occur
       "#{path}?#{URI.encode_www_form({ send_progress_in_http_headers: 1 }.merge(query).compact)}"
-    end
-
-    # @return [Boolean]
-    def faraday_v1?
-      Faraday::VERSION.start_with?('1')
     end
   end
 end
