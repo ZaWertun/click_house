@@ -60,6 +60,14 @@ RSpec.describe 'query parameters' do
     end
   end
 
+  context 'Tuple(Int8, String)' do
+    it 'works' do
+      val = Struct.new(:_1, :_2).new(123, 'String!')
+      resp = subject.select_value('select {id:Tuple(Int8,String)}', id: val)
+      expect(resp).to eq(val.to_a)
+    end
+  end
+
   context 'Array(Int8)' do
     it 'works' do
       vals = [-128, 127]

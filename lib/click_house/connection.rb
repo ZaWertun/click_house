@@ -113,6 +113,8 @@ module ClickHouse
         ClickHouse.types['DateTime'].serialize(val)
       elsif val.is_a?(Array)
         '[' + val.map {|v| param_encode(v, lvl + 1)}.join(',') + ']'
+      elsif val.is_a?(Struct)
+        '(' + val.to_a.map {|v| param_encode(v, lvl + 1)}.join(',') + ')'
       elsif val.is_a?(Hash)
         '{' + val.map {|k, v| param_encode(k, lvl + 1) + ':' + param_encode(v, lvl + 1) }.join(',') + '}'
       else
