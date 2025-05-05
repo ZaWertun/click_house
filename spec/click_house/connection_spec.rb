@@ -2,8 +2,8 @@ RSpec.describe ClickHouse::Connection do
   context 'when basic auth' do
     subject do
       ClickHouse::Connection.new(ClickHouse.config.clone.assign(
-        username: 'user',
-        password: 'password'
+        username: nil,
+        password: nil
       ))
     end
 

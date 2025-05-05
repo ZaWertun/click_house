@@ -12,6 +12,8 @@ ClickHouse.config do |config|
   config.logger = Logger.new('log/test.log', level: Logger::DEBUG)
   config.database = 'click_house_rspec'
   config.url = 'http://localhost:8123?allow_suspicious_low_cardinality_types=1&output_format_arrow_low_cardinality_as_dictionary=1'
+  config.username = 'default'
+  config.password = 'password'
 end
 
 RSpec.configure do |config|

@@ -11,11 +11,11 @@ RSpec.describe ClickHouse::Extend::ConnectionExplaining do
 
   let(:expectation) do
     <<~TXT
-      Expression ((Projection + Before ORDER BY))
+      Expression ((Project names + (Projection + Drop unused columns after JOIN)))
         Join (JOIN FillRightFirst)
-          Expression (Before JOIN)
+          Expression (Change column names to column identifiers)
             ReadFromStorage (TinyLog)
-          Expression ((Joined actions + (Rename joined columns + (Projection + Before ORDER BY))))
+          Expression (Change column names to column identifiers)
             ReadFromStorage (TinyLog)
     TXT
   end
