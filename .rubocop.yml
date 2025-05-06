@@ -1,7 +1,8 @@
-require:
+plugins:
   - rubocop-performance
 
 AllCops:
+  NewCops: enable
   AutoCorrect: false
   SuggestExtensions: false
   Exclude:

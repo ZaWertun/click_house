@@ -85,12 +85,12 @@ module ClickHouse
     # @yield <Hash> called if parameters found
     # @yieldparam [Hash] prepared prepared parameters
     # @see https://clickhouse.com/docs/interfaces/http#cli-queries-with-parameters
-    def params_prepare(input, &blk)
+    def params_prepare(input)
       res = {}
       input.each do |key, value|
         res["param_#{key}"] = param_encode(value)
       end
-      blk.call(res) unless res.empty?
+      yield(res) unless res.empty?
     end
 
     # Encodes SQL query parameter value as URI component
@@ -98,27 +98,43 @@ module ClickHouse
     # @example Some special cases
     #  nil  => '\N'
     #  "\t" => "\\\t"
-    # @param val [NilClass|String|Integer|Float|Decimal|Array|Hash] value
+    # @param val [NilClass,String,Integer,Float,BigDecimal,DateTime,Array,Struct,Hash] value
     # @return [String]
-    def param_encode(val, lvl=1)
+    def param_encode(val, lvl = 1)
+      param_encode_container?(val, lvl) || param_encode_simple(val, lvl)
+    end
+
+    # @param val [NilClass,String,Integer,Float,BigDecimal,DateTime] "simple" value
+    # @return [String]
+    def param_encode_simple(val, lvl = 1)
       if val.nil?
         '\N'
       elsif val.is_a?(String)
-        str = val.gsub(/\t/, "\\\t")
+        str = val.gsub("\t", "\\\t")
         if lvl > 1
-          str = "'" + str.gsub(/'/, "''") + "'"
+          str = "'#{str.gsub('\'', "''")}'"
         end
         str
       elsif val.is_a?(DateTime)
         ClickHouse.types['DateTime'].serialize(val)
-      elsif val.is_a?(Array)
-        '[' + val.map {|v| param_encode(v, lvl + 1)}.join(',') + ']'
-      elsif val.is_a?(Struct)
-        '(' + val.to_a.map {|v| param_encode(v, lvl + 1)}.join(',') + ')'
-      elsif val.is_a?(Hash)
-        '{' + val.map {|k, v| param_encode(k, lvl + 1) + ':' + param_encode(v, lvl + 1) }.join(',') + '}'
       else
         val.to_s
+      end
+    end
+
+    # @param val [Array,Struct,Hash] container
+    # @return [NilClass,String]
+    def param_encode_container?(val, lvl = 1)
+      case val
+      when Array
+        items = val.map { |v| param_encode(v, lvl + 1) }
+        "[#{items.join(',')}]"
+      when Struct
+        items = val.to_a.map { |v| param_encode(v, lvl + 1) }
+        "(#{items.join(',')})"
+      when Hash
+        items = val.map { |k, v| "#{param_encode(k, lvl + 1)}:#{param_encode(v, lvl + 1)}" }
+        "{#{items.join(',')}}"
       end
     end
   end
